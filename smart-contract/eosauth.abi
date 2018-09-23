@@ -1,0 +1,104 @@
+{
+  "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sat Sep 22 15:38:35 2018",
+  "version": "eosio::abi/1.0",
+  "structs": [
+    {
+      "name": "request",
+      "base": "",
+      "fields": [
+        {
+          "name": "requestId",
+          "type": "uint64"
+        },
+        {
+          "name": "requester",
+          "type": "name"
+        },
+        {
+          "name": "approver",
+          "type": "name"
+        },
+        {
+          "name": "publicKey",
+          "type": "string"
+        },
+        {
+          "name": "resourcePath",
+          "type": "string"
+        },
+        {
+          "name": "isApproved",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "requestpm",
+      "base": "",
+      "fields": [
+        {
+          "name": "requester",
+          "type": "name"
+        },
+        {
+          "name": "approver",
+          "type": "name"
+        },
+        {
+          "name": "publicKey",
+          "type": "string"
+        },
+        {
+          "name": "resourcePath",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "approve",
+      "base": "",
+      "fields": [
+        {
+          "name": "requestId",
+          "type": "uint64"
+        },
+        {
+          "name": "requester",
+          "type": "name"
+        },
+        {
+          "name": "approver",
+          "type": "name"
+        }
+      ]
+    }
+  ],
+  "types": [],
+  "actions": [
+    {
+      "name": "requestpm",
+      "type": "requestpm",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "approve",
+      "type": "approve",
+      "ricardian_contract": ""
+    }
+  ],
+  "tables": [
+    {
+      "name": "requests",
+      "index_type": "i64",
+      "key_names": [
+        "requestId"
+      ],
+      "key_types": [
+        "uint64_t"
+      ],
+      "type": "request"
+    }
+  ],
+  "ricardian_clauses": [],
+  "abi_extensions": []
+}
