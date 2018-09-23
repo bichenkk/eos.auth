@@ -1,0 +1,46 @@
+@import "~antd/dist/antd.less";
+
+@app-theme-color        : #101535;
+
+// https://ant.design/docs/react/customize-theme
+// https://github.com/ant-design/ant-design/blob/master/components/style/themes/default.less
+@primary-color          : @app-theme-color;
+@font-size-base         : 12px;
+@font-size-lg           : @font-size-base;
+@font-size-sm           : 10px;
+@layout-sider-background        : #000000;
+@menu-bg: @component-background;
+@menu-item-color: @text-color;
+@menu-highlight-color: @primary-color;
+@menu-item-group-title-color: @text-color-secondary;
+@menu-dark-bg: #000000;
+@menu-dark-item-active-bg: #000000;
+@menu-dark-submenu-bg: #000000;
+
+body {
+  h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+  }
+  .ant-input-affix-wrapper {
+    .ant-input {
+      min-height: 0;
+    }
+  }
+  table {
+    font-size: @font-size-base;
+  }
+  .ant-pagination-prev .ant-pagination-item-link, .ant-pagination-next .ant-pagination-item-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .ant-menu-submenu-title {
+    color: rgba(255, 255, 255, 0.65);
+    .ant-menu-submenu-arrow {
+      color: rgba(255, 255, 255, 0.65);
+    }
+  }
+  .ant-form-explain {
+    padding-top: 4px;
+  }
+}

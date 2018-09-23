@@ -1,0 +1,75 @@
+image: docker:latest
+services:
+- docker:dind
+
+stages:
+  - build
+  - release
+  - deployDev
+  - deployProd
+
+variables:
+  CONTAINER_IMAGE: registry.gitlab.com/binatir/binatir-admin-web:$CI_COMMIT_REF_NAME
+  CONTAINER_RELEASE_IMAGE: registry.gitlab.com/binatir/binatir-admin-web:latest
+  CONTAINER_TAG: binatir-admin
+  CONTAINER_PORT: 7000
+
+build_image:
+  variables:
+    DOCKER_DRIVER: overlay
+  stage: build
+  only:
+    - dev
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - >
+      docker build -t $CONTAINER_IMAGE
+      --build-arg NODE_ENV=production
+      --build-arg API_URL=https://api-dev.binatir.com/admin
+      .
+    - docker push $CONTAINER_IMAGE
+
+release_image:
+  variables:
+    DOCKER_DRIVER: overlay
+  only:
+    - master
+  stage: release
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - >
+      docker build -t $CONTAINER_RELEASE_IMAGE
+      .
+    - docker push $CONTAINER_RELEASE_IMAGE
+
+deploy_image_dev:
+  image: ubuntu:xenial
+  stage: deployDev
+  only:
+    - dev
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$DEV_SSH_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo "$DEV_SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+    - ssh ubuntu@$DEV_SVR_ADD sudo docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - "! ssh ubuntu@$DEV_SVR_ADD \"sudo docker pull $CONTAINER_IMAGE && sudo docker rm -f $CONTAINER_TAG\""
+    - ssh ubuntu@$DEV_SVR_ADD sudo docker run --rm -d -p$CONTAINER_PORT:$CONTAINER_PORT --name $CONTAINER_TAG $CONTAINER_IMAGE
+    - ssh ubuntu@$DEV_SVR_ADD sudo docker system prune -a -f
+
+deploy_image_prod:
+  image: ubuntu:xenial
+  stage: deployProd
+  only:
+    - master
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$PROD_SSH_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo "$PROD_SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
+    - ssh ubuntu@$PROD_SVR_ADD sudo docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - "! ssh ubuntu@$PROD_SVR_ADD \"sudo docker pull $CONTAINER_RELEASE_IMAGE && sudo docker rm -f $CONTAINER_TAG\""
+    - ssh ubuntu@$PROD_SVR_ADD sudo docker run --rm -d -p$CONTAINER_PORT:$CONTAINER_PORT --name $CONTAINER_TAG $CONTAINER_RELEASE_IMAGE
+    - ssh ubuntu@$PROD_SVR_ADD sudo docker system prune -a -f
